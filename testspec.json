@@ -1,0 +1,18 @@
+{
+    "datasets": [
+        { 
+            "Name": "Short strings",
+            "keys": [
+              {
+                "name": "Short string",
+                "length": 5,
+                "value": {
+                    "type": "string",
+                    "length": 5
+                }
+              }
+          ]
+        }
+    ]
+}
+

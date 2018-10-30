@@ -1,0 +1,186 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "http://redislabs.com/crdbmemcalc/v1",
+
+    "type": "object",
+
+    "definitions": {
+        "redis_config_param": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Redis CONFIG.SET parameter name",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Redis CONFIG.SET parameter value",
+                    "type": ["string", "number"]
+                }
+            },
+            "required": [ "name", "value" ],
+            "additionalItems": false
+        },
+
+        "string_value": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [ "string" ]
+                },
+                "length": {
+                    "type": "number",
+                    "minValue": 1
+                }
+            },
+            "required": [ "type", "length" ],
+            "additionalItems": false
+        },
+
+        "set_value": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [ "set" ]
+                },
+                "elements_num": {
+                    "type": "number",
+                    "minValue": 1
+                },
+                "element_length": {
+                    "type": "number",
+                    "minValue": 1
+                }
+            },
+            "required": [ "type", "elements_num", "element_length" ],
+            "additionalItems": false
+        },
+
+        "hash_value": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [ "hash" ]
+                },
+                "elements_num": {
+                    "type": "number",
+                    "minValue": 1
+                },
+                "elements_length": {
+                    "type": "number",
+                    "minValue": 1
+                }
+            },
+            "required": [ "type", "elements_num", "element_length" ],
+            "additionalItems": false
+        },
+
+        "sorted_set_value": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [ "sorted_set" ]
+                },
+                "elements_num": {
+                    "type": "number",
+                    "minValue": 1
+                },
+                "elements_length": {
+                    "type": "number",
+                    "minValue": 1
+                }
+            },
+            "required": [ "type", "elements_num", "element_length" ],
+            "additionalItems": false
+        },
+
+        "list_value": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [ "list" ]
+                },
+                "elements_num": {
+                    "type": "number",
+                    "minValue": 1
+                },
+                "element_length": {
+                    "type": "number",
+                    "minValue": 1
+                }
+            },
+            "required": [ "type", "elements_num", "element_length" ],
+            "additionalItems": false
+        },
+
+        "key": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Name of this type of key",
+                    "type": "string"
+                },
+                "length": {
+                    "description": "Length of key name",
+                    "type": "number",
+                    "minValue": 1
+                },
+                "value": {
+                    "description": "Data type specific value",
+                    "oneOf": [
+                        { "$ref": "#/definitions/string_value" },
+                        { "$ref": "#/definitions/set_value" },
+                        { "$ref": "#/definitions/sorted_set_value" },
+                        { "$ref": "#/definitions/hash_value" },
+                        { "$ref": "#/definitions/list_value" }
+                    ]
+                }
+            },
+            "required": [ "name", "length", "value" ],
+            "additionalItems": false
+        },
+
+        "dataset": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Name of dataset",
+                    "type": "string"
+                },
+                "redis_configuration": {
+                    "description": "List of Redis configuration parameters",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/redis_config_param"
+                    }
+                },
+                "keys": {
+                    "description": "List of keys to create",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/key"
+                    }
+                }
+            },
+            "required": [ "name", "keys" ]
+        }
+    },
+
+    "properties": {
+        "datasets": {
+            "description": "Specification of datasets to test",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/definitions/dataset"
+            }
+        }
+    },
+
+    "required": [ "datasets" ]
+}
