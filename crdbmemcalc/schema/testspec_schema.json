@@ -68,7 +68,11 @@
                     "type": "number",
                     "minValue": 1
                 },
-                "elements_length": {
+                "element_key_length": {
+                    "type": "number",
+                    "minValue": 1
+                },
+                "element_length": {
                     "type": "number",
                     "minValue": 1
                 }

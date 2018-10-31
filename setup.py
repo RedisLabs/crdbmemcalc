@@ -10,7 +10,8 @@ setup(
     install_requires=[
         'jsonschema==2.6.0',
         'click==7.0',
-        'humanize==0.5.1'
+        'humanize==0.5.1',
+        'redis==2.10.6'
     ],
     entry_points='''
         [console_scripts]

@@ -8,6 +8,9 @@ import pkg_resources
 import click
 from jsonschema import validate
 
+from crdbmemcalc.spec import Spec
+from crdbmemcalc.redis import Process
+
 @click.command()
 @click.option('--specfile', '-s', required=True, type=file,
               help='Memory calculator test spec file.')
@@ -15,7 +18,10 @@ from jsonschema import validate
               default='/opt/redislabs/bin/redis-server')
 @click.option('--crdt-module', required=False,
               default='/opt/redislabs/lib/crdt.so')
-def cli(specfile, redis_executable, crdt_module):
+@click.option('--key-factor', required=False, type=int, default=1000,
+              help='Factor to apply on number of keys')
+
+def cli(specfile, redis_executable, crdt_module, key_factor):
     """
     Run memory calculation to compare a Redis dataset with an equivalent
     CRDB dataset.
@@ -31,11 +37,18 @@ def cli(specfile, redis_executable, crdt_module):
         sys.exit(1)
 
     try:
-        testspec = json.load(specfile)
+        spec_data = json.load(specfile)
     except Exception as err:
         click.echo('Error: failed to load specfile: {}'.format(err))
 
     try:
-        validate(testspec, schema)
+        validate(spec_data, schema)
     except Exception as err:
         click.echo('Error: invalid testspec: {}'.format(err))
+        sys.exit(1)
+
+    spec = Spec.from_json(spec_data)
+    srv = Process(executable=redis_executable)
+    srv.start()
+    spec.create(srv.get_conn(), key_factor)
+    sys.stdin.readline()
