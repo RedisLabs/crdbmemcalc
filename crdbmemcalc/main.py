@@ -8,8 +8,8 @@ import pkg_resources
 import click
 from jsonschema import validate
 
-from crdbmemcalc.spec import Spec
-from crdbmemcalc.redis import Process
+from crdbmemcalc.spec import Spec, TestCase
+from crdbmemcalc.redis import Process, RedisConfig, CRDBConfig
 
 @click.command()
 @click.option('--specfile', '-s', required=True, type=file,
@@ -48,7 +48,16 @@ def cli(specfile, redis_executable, crdt_module, key_factor):
         sys.exit(1)
 
     spec = Spec.from_json(spec_data)
-    srv = Process(executable=redis_executable)
-    srv.start()
-    spec.create(srv.get_conn(), key_factor)
-    sys.stdin.readline()
+    redis_config = RedisConfig(executable=redis_executable)
+    redis_proc = Process(redis_config)
+    redis_proc.start()
+    TestCase(spec, redis_proc, key_factor).run()
+    redis_proc.stop()
+
+    crdb_config = CRDBConfig(executable=redis_executable,
+                             crdtmodule=crdt_module)
+    redis_proc = Process(crdb_config)
+    redis_proc.start()
+    TestCase(spec, redis_proc, key_factor).run()
+    redis_proc.stop()
+

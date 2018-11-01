@@ -155,7 +155,7 @@
                     "description": "Name of dataset",
                     "type": "string"
                 },
-                "redis_configuration": {
+                "redis_config_params": {
                     "description": "List of Redis configuration parameters",
                     "type": "array",
                     "items": {

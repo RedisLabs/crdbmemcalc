@@ -4,6 +4,7 @@ Test spec execution implementation.
 import random
 import string
 from abc import abstractmethod
+from crdbmemcalc.redis import ConfigParam
 
 def make_random_string(length):
     return ''.join(random.choice(string.ascii_letters + string.digits)
@@ -94,8 +95,9 @@ class Key(object):
             self.name, self.length, repr(self.value))
 
 class Dataset(object):
-    def __init__(self, keys):
+    def __init__(self, keys, config_params):
         self.keys = keys
+        self.config_params = config_params
 
     def create(self, conn, key_factor):
         for k in self.keys:
@@ -104,7 +106,9 @@ class Dataset(object):
 
     @classmethod
     def from_json(cls, obj):
-        return cls(keys=[Key.from_json(k) for k in obj['keys']])
+        return cls(keys=[Key.from_json(k) for k in obj['keys']],
+                   config_params=[ConfigParam.from_json(c)
+                                  for c in obj.get('redis_config_params', [])])
 
     def __repr__(self):
         return '<Dataset keys=[{}]>'.format(
@@ -122,3 +126,20 @@ class Spec(object):
     @classmethod
     def from_json(cls, obj):
         return cls(datasets=[Dataset.from_json(d) for d in obj['datasets']])
+
+
+class TestCase(object):
+    def __init__(self, spec, redis, key_factor):
+        self.spec = spec
+        self.redis = redis
+        self.key_factor = key_factor
+        self.memory_start = None
+        self.memory_end = None
+
+    def run(self):
+        self.memory_start = self.redis.used_memory()
+        self.spec.create(self.redis.get_conn(), self.key_factor)
+        self.memory_end = self.redis.used_memory()
+
+        print 'Used memory: {}'.format(self.memory_end - self.memory_start)
+
