@@ -124,10 +124,6 @@
         "key": {
             "type": "object",
             "properties": {
-                "name": {
-                    "description": "Name of this type of key",
-                    "type": "string"
-                },
                 "length": {
                     "description": "Length of key name",
                     "type": "number",
@@ -144,7 +140,7 @@
                     ]
                 }
             },
-            "required": [ "name", "length", "value" ],
+            "required": [ "length", "value" ],
             "additionalItems": false
         },
 

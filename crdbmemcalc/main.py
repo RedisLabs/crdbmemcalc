@@ -8,17 +8,18 @@ import pkg_resources
 import click
 from jsonschema import validate
 
-from crdbmemcalc.spec import Spec, TestCase
+from crdbmemcalc.spec import Spec
 from crdbmemcalc.redis import Process, RedisConfig, CRDBConfig
+from crdbmemcalc.runner import Report, DatasetRunner
 
 @click.command()
 @click.option('--specfile', '-s', required=True, type=file,
               help='Memory calculator test spec file.')
 @click.option('--redis-executable', required=False,
-              default='/opt/redislabs/bin/redis-server')
+              default='/opt/redislabs/bin/redis-server-5.0')
 @click.option('--crdt-module', required=False,
-              default='/opt/redislabs/lib/crdt.so')
-@click.option('--key-factor', required=False, type=int, default=1000,
+              default='/opt/redislabs/lib/redis/5.0/crdt.so')
+@click.option('--key-factor', required=False, type=int, default=100,
               help='Factor to apply on number of keys')
 
 def cli(specfile, redis_executable, crdt_module, key_factor):
@@ -48,16 +49,14 @@ def cli(specfile, redis_executable, crdt_module, key_factor):
         sys.exit(1)
 
     spec = Spec.from_json(spec_data)
-    redis_config = RedisConfig(executable=redis_executable)
-    redis_proc = Process(redis_config)
-    redis_proc.start()
-    TestCase(spec, redis_proc, key_factor).run()
-    redis_proc.stop()
+    report = Report()
 
-    crdb_config = CRDBConfig(executable=redis_executable,
-                             crdtmodule=crdt_module)
-    redis_proc = Process(crdb_config)
-    redis_proc.start()
-    TestCase(spec, redis_proc, key_factor).run()
-    redis_proc.stop()
+    configs = [
+        RedisConfig('Redis', executable=redis_executable),
+        CRDBConfig('CRDB', executable=redis_executable,
+                   crdtmodule=crdt_module)
+    ]
 
+    for dataset in spec.datasets:
+        DatasetRunner(dataset, configs, key_factor).run(report)
+    print report.generate()

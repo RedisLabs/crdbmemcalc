@@ -1,14 +1,119 @@
 {
     "datasets": [
         { 
-            "name": "Short strings",
+            "name": "Strings: short keys and values",
             "keys": [
               {
                 "name": "Short string",
-                "length": 5,
+                "length": 20,
                 "value": {
                     "type": "string",
-                    "length": 5
+                    "length": 30 
+                }
+              }
+          ]
+        },
+        { 
+            "name": "Strings: short keys, 1K values",
+            "keys": [
+              {
+                "name": "Long string",
+                "length": 20,
+                "value": {
+                    "type": "string",
+                    "length": 1024 
+                }
+              }
+          ]
+        },
+        { 
+            "name": "Sets: small sets, short elements",
+            "keys": [
+              {
+                "length": 20,
+                "value": {
+                    "type": "set",
+                    "elements_num": 20,
+                    "element_length": 20
+                }
+              }
+          ]
+        },
+        { 
+            "name": "Sets: large sets, short elements",
+            "keys": [
+              {
+                "length": 20,
+                "value": {
+                    "type": "set",
+                    "elements_num": 500,
+                    "element_length": 20
+                }
+              }
+          ]
+        },
+        { 
+            "name": "Sorted Sets: small sorted sets, short elements",
+            "keys": [
+              {
+                "length": 20,
+                "value": {
+                    "type": "sorted_set",
+                    "elements_num": 20,
+                    "element_length": 20
+                }
+              }
+          ]
+        },
+        { 
+            "name": "Sorted Sets: large sorted sets, short elements",
+            "keys": [
+              {
+                "length": 20,
+                "value": {
+                    "type": "sorted_set",
+                    "elements_num": 500,
+                    "element_length": 20
+                }
+              }
+          ]
+        },
+        { 
+            "name": "Hashes: large hashes, short keys and values",
+            "keys": [
+              {
+                "length": 20,
+                "value": {
+                    "type": "hash",
+                    "elements_num": 500,
+                    "element_key_length": 20,
+                    "element_length": 20
+                }
+              }
+          ]
+        },
+        { 
+            "name": "Lists: short lists, short elements",
+            "keys": [
+              {
+                "length": 20,
+                "value": {
+                    "type": "list",
+                    "elements_num": 20,
+                    "element_length": 20
+                }
+              }
+          ]
+        },
+        { 
+            "name": "Lists: long lists, short elements",
+            "keys": [
+              {
+                "length": 20,
+                "value": {
+                    "type": "list",
+                    "elements_num": 500,
+                    "element_length": 20
                 }
               }
           ]

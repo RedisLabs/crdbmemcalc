@@ -18,29 +18,44 @@ class ConfigParam(object):
     def from_json(cls, obj):
         return cls(name=obj['name'], value=obj['value'])
 
+    @classmethod
+    def from_redis(cls, conn, name):
+        return cls(name=name, value=conn.config_get(name).get(name))
+
 class RedisConfig(object):
     SOCKET_PATH = '/tmp/crdbmemcalc_redis.sock'
 
-    def __init__(self, executable):
+    def __init__(self, name, executable):
+        self._name = name
         self.executable = executable
+        self.version = None
 
     def get_conn_info(self):
         return {'unix_socket_path': self.SOCKET_PATH}
+
+    def set_version(self, version):
+        self.version = version
 
     def get_args(self):
         return [self.executable,
                 '--unixsocket', self.SOCKET_PATH]
 
+    @property
+    def name(self):
+        if not self.version:
+            return self._name
+        return '{}-{}'.format(self._name, self.version)
+
 class CRDBConfig(RedisConfig):
-    def __init__(self, executable, crdtmodule):
-        super(CRDBConfig, self).__init__(executable)
+    def __init__(self, name, executable, crdtmodule):
+        super(CRDBConfig, self).__init__(name, executable)
         self.crdtmodule = crdtmodule
 
     def get_args(self):
         return [self.executable,
                 '--unixsocket', self.SOCKET_PATH,
                 '--loadmodule', self.crdtmodule,
-                'replica_id=1',
+                'replica-id=1',
                 'replicas=1:',
                 'slots=16384:0-16383']
 
@@ -53,6 +68,7 @@ class Process(object):
 
     def start(self):
         self.process = subprocess.Popen(
+            stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             executable=self.config.executable,
             args=self.config.get_args())
         self.ping()
@@ -85,6 +101,25 @@ class Process(object):
                     time.sleep(interval)
                 else:
                     raise
+
+    def configure(self, config_params):
+        conn = self.get_conn()
+        for param in config_params:
+            conn.config_set(param.name, param.value)
+
+    def get_active_config(self):
+        PARAMS = [
+            'hash-max-ziplist-entries',
+            'hash-max-ziplist-value',
+            'hash-max-ziplist-value',
+            'list-compress-depth',
+            'set-max-intset-entries',
+            'zset-max-ziplist-entries',
+            'zset-max-ziplist-value'
+        ]
+
+        return [ConfigParam.from_redis(self.get_conn(), name)
+                for name in PARAMS]
 
     def stop(self):
         if self.process:
