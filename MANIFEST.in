@@ -1,0 +1,2 @@
+include crdbmemcalc/schema/*.json
+include testspec.json
