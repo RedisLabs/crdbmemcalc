@@ -56,8 +56,11 @@ class CRDBConfig(RedisConfig):
                 '--unixsocket', self.SOCKET_PATH,
                 '--loadmodule', self.crdtmodule,
                 'replica-id=1',
+                'shard-id=1',
                 'replicas=1:',
-                'slots=16384:0-16383']
+                'slots=16384:0-16383',
+                'protocol-version=1',
+                'featureset-version=1']
 
 class Process(object):
     def __init__(self, config):
