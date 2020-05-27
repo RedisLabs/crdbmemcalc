@@ -13,7 +13,7 @@ from crdbmemcalc.redis import Process, RedisConfig, CRDBConfig
 from crdbmemcalc.runner import Report, DatasetRunner
 
 @click.command()
-@click.option('--specfile', '-s', required=True, type=file,
+@click.option('--specfile', '-s', required=True, type=click.File(),
               help='Memory calculator test spec file.')
 @click.option('--redis-executable', required=False,
               default='/opt/redislabs/bin/redis-server-5.0')
@@ -59,4 +59,4 @@ def cli(specfile, redis_executable, crdt_module, key_factor):
 
     for dataset in spec.datasets:
         DatasetRunner(dataset, configs, key_factor).run(report)
-    print report.generate()
+    click.echo(report.generate())
