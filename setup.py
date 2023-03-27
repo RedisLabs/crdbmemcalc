@@ -27,7 +27,7 @@ setup(
         'jsonschema==2.6.0',
         'click==7.0',
         'humanize==0.5.1',
-        'redis==2.10.6',
+        'redis==4.5.3',
         'tabulate==0.8.2'
     ],
     entry_points='''
